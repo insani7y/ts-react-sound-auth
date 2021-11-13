@@ -1,37 +1,42 @@
-import React, {SyntheticEvent, useState} from "react";
+import React, { SyntheticEvent, useEffect, useState } from "react"
 import axiosInstance from "../axios";
 
 import RecordView from "../components/Record";
 
-
 const Register = () => {
+    const [files, setFiles] = useState<(string)[]>([])
     const [email, setEmail] = useState("")
-    const [fileState, setFileState] = useState<(string | null)[]>([])
 
-    const onFileAdd = (url: string | null) => {
-        setFileState([...fileState, url])
+    const [isComplete, setIsComplete] = useState(false)
+
+    useEffect(() => {
+        let nextIsComplete = false
+        if (email.trim() && files.length === 5) {
+            nextIsComplete = true
+        }
+        setIsComplete(nextIsComplete)
+    }, [email, files])
+
+    const handleAdd = (url: string) => {
+        setFiles([...files, url])
     }
 
-    // const onFileChange = async (e: SyntheticEvent) => {
-    //     const target = e.target as HTMLInputElement
-    //     const files = target.files
-    //
-    //     if (files && files.length) {
-    //         filesState[target.name] = files[0]
-    //         return
-    //     }
-    //
-    //     console.error("no file")
-    // }
+    const handleDelete = async (idx: number) => {
+        setFiles(files.filter((_, id) => id !== idx))
+    }
 
-    const submit = async (e: SyntheticEvent) => {
+    const onSubmit = async (e: SyntheticEvent) => {
         e.preventDefault()
 
         const formData = new FormData()
         formData.append("email", email)
-        // for (const [key, value] of Object.entries(filesState)) {
-        //     formData.append(key, value, value.name)
-        // }
+
+        files.forEach((file, idx) => {
+            // TODO сделать нормальную конвертацию блоба
+            formData.append(`audio-file-${idx}`, file)
+        })
+
+        console.log(formData)
 
         await axiosInstance.post("register", formData)
             .then(function (response) {
@@ -42,35 +47,45 @@ const Register = () => {
             });
     }
 
-    const onDeleteFile = async (idx: number) => {
-        setFileState(fileState.filter((_, id) => id !== idx))
-    }
-
     return (
         <div>
-            {fileState.map((url, idx) => (
-                <>
-                    <p>audio record {idx + 1} &#10003;</p>
-                    <p onClick={() => onDeleteFile(idx)}>&#10008;</p>
-                    <audio src={url as string | undefined} controls />
-                </>
+            <h1 className="h2 mb-4 fw-normal text-center">Please register</h1>
+            {files.map((url, idx) => (
+                <div className="card mb-3">
+                    <div className="card-body d-flex align-items-center justify-content-between">
+                        <p className="h4 card-title mt-0 mb-0 me-4" >№ {idx + 1}</p>
+                        <audio src={url as string | undefined} controls />
+                        <button
+                            type="button"
+                            className="btn btn-danger"
+                            onClick={() => handleDelete(idx)}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </div>
             ))}
-            <RecordView
-                onFileAdd={onFileAdd}
-            />
-            <form onSubmit={submit}>
-                <h1 className="h3 mb-3 fw-normal">Please register</h1>
-
-                <input type="email" className="form-control" placeholder="name@example.com" required
-                       onChange={e => setEmail(e.target.value)}
+            {files.length < 5 && (
+                <RecordView
+                    left={5 - files.length}
+                    onFileAdd={handleAdd}
                 />
-                {/*<input type="file" name="file1" className="form-control" onChange={onFileChange} required/>*/}
-                {/*<input type="file" name="file2" className="form-control" onChange={onFileChange} required/>*/}
-                {/*<input type="file" name="file3" className="form-control" onChange={onFileChange} required/>*/}
-                {/*<input type="file" name="file4" className="form-control" onChange={onFileChange} required/>*/}
-                {/*<input type="file" name="file5" className="form-control" onChange={onFileChange} required/>*/}
-
-                <button className="w-100 btn btn-lg btn-primary" type="submit">Submit</button>
+            )}
+            <form onSubmit={onSubmit}>
+                <input
+                    type="email"
+                    className="form-control mb-3 mt-3"
+                    placeholder="name@example.com"
+                    required
+                    onChange={e => setEmail(e.target.value)}
+                />
+                <button
+                    className="w-100 btn btn-success"
+                    type="submit"
+                    disabled={!isComplete}
+                >
+                    Submit
+                </button>
             </form>
         </div>
 
