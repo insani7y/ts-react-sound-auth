@@ -1,45 +1,24 @@
-import {ReactMediaRecorder} from "react-media-recorder";
-import React, {useEffect, useState} from "react";
+import { ReactMediaRecorder } from "react-media-recorder";
+import React from "react";
 
 interface RecordViewProps {
-    onFileAdd: (url: string) => void
+    onFileAdd: (url: string, blob: Blob) => void
     left: number
 }
 
 const RecordView = ({ onFileAdd, left }: RecordViewProps) => {
-    const [isStop, setIsStop] = useState(false)
-    const [url, setUrl] = useState<string | undefined>()
-
-    useEffect(() => {
-        if (isStop) {
-            onFileAdd(url as string)
-            setIsStop(false)
-        }
-    }, [isStop, onFileAdd, url])
-
     const startWithTimeout = (start: Function, stop: Function) => {
         start()
         setTimeout(() => {
             stop()
-
-            setTimeout(() => {
-                setIsStop(true)
-            }, 0)
-
         }, 1500)
-    }
-
-    const getFileBlob = (url: string | undefined) => {
-        if (url) {
-            setUrl(url)
-        }
-        return url
     }
 
     return (
         <div>
             <ReactMediaRecorder
-                audio
+                audio={true}
+                onStop={onFileAdd}
                 render={({ status, startRecording, stopRecording, mediaBlobUrl}) => (
                     <>
                         <button
@@ -47,9 +26,16 @@ const RecordView = ({ onFileAdd, left }: RecordViewProps) => {
                             onClick={() => startWithTimeout(startRecording, stopRecording)}
                             disabled={status === "recording"}
                         >
-                            Start Recording (left to record: {left} files)
+                            {status === "recording" ? (
+                                <div className="spinner-border spinner-border-sm" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div>
+                            ) : (
+                                <span>Start Recording (left to record: {left} files)</span>
+                            )}
+
                         </button>
-                        <audio src={getFileBlob(mediaBlobUrl as string | undefined)} hidden controls />
+                        <audio src={mediaBlobUrl as string | undefined} hidden controls />
                     </>
                 )}
             />

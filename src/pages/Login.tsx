@@ -1,15 +1,42 @@
-import React from "react";
+import axiosInstance from '../axios'
+import React, { useState } from "react";
+import Auth from '../components/Auth'
+import { useNavigate } from 'react-router-dom'
+import Private from './Private'
 
 const Login = () => {
+    const navigate = useNavigate()
+    const [error, setError] = useState("")
+
+    const onSubmit = async (formData: FormData) => {
+        setError("")
+        await axiosInstance.post("login", formData)
+            .then(function (_) {
+                navigate('/private')
+            })
+            .catch(function (error) {
+                setError(error)
+            });
+    }
+
     return (
-        <form>
-            <h1 className="h3 mb-3 fw-normal">Please sign in</h1>
-
-            <input type="email" className="form-control" placeholder="name@example.com"/>
-            <input type="password" className="form-control" placeholder="password"/>
-
-            <button className="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-        </form>
+        <>
+            {error && (
+                <div className="alert alert-warning alert-dismissible fade show">
+                    {error}
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setError("")}
+                    />
+                </div>
+            )}
+            <Auth
+                title={"Please login"}
+                whenSubmit={onSubmit}
+                totalCount={1}
+            />
+        </>
     )
 }
 

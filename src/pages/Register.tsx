@@ -1,94 +1,41 @@
-import React, { SyntheticEvent, useEffect, useState } from "react"
-import axiosInstance from "../axios";
-
-import RecordView from "../components/Record";
+import axiosInstance from '../axios'
+import React, {useState} from "react"
+import Auth from '../components/Auth'
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-    const [files, setFiles] = useState<(string)[]>([])
-    const [email, setEmail] = useState("")
+    const navigate = useNavigate()
+    const [error, setError] = useState("")
 
-    const [isComplete, setIsComplete] = useState(false)
-
-    useEffect(() => {
-        let nextIsComplete = false
-        if (email.trim() && files.length === 5) {
-            nextIsComplete = true
-        }
-        setIsComplete(nextIsComplete)
-    }, [email, files])
-
-    const handleAdd = (url: string) => {
-        setFiles([...files, url])
-    }
-
-    const handleDelete = async (idx: number) => {
-        setFiles(files.filter((_, id) => id !== idx))
-    }
-
-    const onSubmit = async (e: SyntheticEvent) => {
-        e.preventDefault()
-
-        const formData = new FormData()
-        formData.append("email", email)
-
-        files.forEach((file, idx) => {
-            // TODO сделать нормальную конвертацию блоба
-            formData.append(`audio-file-${idx}`, file)
-        })
-
-        console.log(formData)
-
+    const onSubmit = async (formData: FormData) => {
+        setError("")
         await axiosInstance.post("register", formData)
-            .then(function (response) {
-                console.log(response);
+            .then(function (_) {
+                navigate('/login')
             })
             .catch(function (error) {
-                console.log(error);
+                setError(error)
             });
     }
 
     return (
-        <div>
-            <h1 className="h2 mb-4 fw-normal text-center">Please register</h1>
-            {files.map((url, idx) => (
-                <div className="card mb-3">
-                    <div className="card-body d-flex align-items-center justify-content-between">
-                        <p className="h4 card-title mt-0 mb-0 me-4" >№ {idx + 1}</p>
-                        <audio src={url as string | undefined} controls />
-                        <button
-                            type="button"
-                            className="btn btn-danger"
-                            onClick={() => handleDelete(idx)}
-                        >
-                            Delete
-                        </button>
-                    </div>
+        <>
+            {error && (
+                <div className="alert alert-warning alert-dismissible fade show">
+                    {error}
+                    <button
+                        type="button"
+                        className="btn-close"
+                        onClick={() => setError("")}
+                    />
                 </div>
-            ))}
-            {files.length < 5 && (
-                <RecordView
-                    left={5 - files.length}
-                    onFileAdd={handleAdd}
-                />
             )}
-            <form onSubmit={onSubmit}>
-                <input
-                    type="email"
-                    className="form-control mb-3 mt-3"
-                    placeholder="name@example.com"
-                    required
-                    onChange={e => setEmail(e.target.value)}
-                />
-                <button
-                    className="w-100 btn btn-success"
-                    type="submit"
-                    disabled={!isComplete}
-                >
-                    Submit
-                </button>
-            </form>
-        </div>
-
+            <Auth
+                title={"Please register"}
+                whenSubmit={onSubmit}
+                totalCount={5}
+            />
+        </>
     )
 }
 

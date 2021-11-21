@@ -1,10 +1,13 @@
-import React from 'react';
-import './App.css';
-import Login from "./pages/Login";
+import React from 'react'
+import './App.css'
+import { BrowserRouter, Route, Routes } from "react-router-dom"
+
+import Login from "./pages/Login"
 import Home from "./pages/Home"
-import Register from "./pages/Register";
-import Nav from "./components/Nav";
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Register from "./pages/Register"
+import Private from './pages/Private'
+
+import Nav from "./components/Nav"
 
 function App() {
     return (
@@ -16,11 +19,12 @@ function App() {
                         <Route path="/" element={<Home/>}/>
                         <Route path="/register" element={<Register/>}/>
                         <Route path="/login" element={<Login/>}/>
+                        <Route path="/private" element={<Private/>}/>
                     </Routes>
                 </main>
             </BrowserRouter>
         </div>
-    );
+    )
 }
 
-export default App;
+export default App
