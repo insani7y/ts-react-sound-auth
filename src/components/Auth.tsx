@@ -1,4 +1,5 @@
 import React, {SyntheticEvent, useEffect, useState} from "react"
+import toWav from "audiobuffer-to-wav"
 
 import RecordView from "./Record";
 
@@ -45,9 +46,20 @@ const Auth = ({title, whenSubmit, totalCount}: LoginProps) => {
         const formData = new FormData()
         formData.append("email", email)
 
-        files.forEach(({blob}, index) => {
-            formData.append(`file${index + 1}`, blob)
-        })
+        const audioContext = new AudioContext()
+
+        for (let i=0; i < files.length; i++) {
+
+            const arrayBuffer = await files[i].blob.arrayBuffer()
+
+            await audioContext.decodeAudioData(arrayBuffer, function (buffer) {
+                const wav = toWav(buffer)
+
+                const wavBlob = new Blob([wav])
+
+                formData.append(`file${i + 1}`, wavBlob, "filename.wav")
+            })
+        }
 
         setIsLoading(true)
         await whenSubmit(formData)

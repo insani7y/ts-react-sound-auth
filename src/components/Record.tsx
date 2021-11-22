@@ -19,6 +19,9 @@ const RecordView = ({ onFileAdd, left }: RecordViewProps) => {
             <ReactMediaRecorder
                 audio={true}
                 onStop={onFileAdd}
+                blobPropertyBag={{
+                    type: "audio/wav"
+                }}
                 render={({ status, startRecording, stopRecording, mediaBlobUrl}) => (
                     <>
                         <button

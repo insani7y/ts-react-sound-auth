@@ -1,7 +1,7 @@
 import axiosInstance from '../axios'
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Auth from '../components/Auth'
-import { useNavigate } from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import Private from './Private'
 
 const Login = () => {
@@ -10,13 +10,13 @@ const Login = () => {
 
     const onSubmit = async (formData: FormData) => {
         setError("")
-        await axiosInstance.post("login", formData)
-            .then(function (_) {
-                navigate('/private')
-            })
-            .catch(function (error) {
-                setError(error)
-            });
+        try {
+            const res = await axiosInstance.post("jwt", formData)
+            const token = res.data.access
+            navigate(`/private?token=${token}`)
+        } catch (e) {
+            setError(e as string)
+        }
     }
 
     return (
