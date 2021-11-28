@@ -10,13 +10,24 @@ const Login = () => {
 
     const onSubmit = async (formData: FormData) => {
         setError("")
-        try {
-            const res = await axiosInstance.post("jwt", formData)
-            const token = res.data.access
-            navigate(`/private?token=${token}`)
-        } catch (e) {
-            setError(e as string)
-        }
+        await axiosInstance.post("jwt", formData)
+            .then(res => {
+                const token = res.data.access
+                navigate(`/private?token=${token}`)
+            })
+            .catch(err => {
+                let message = "Неизвестная ошибка, попробуйте еще раз..."
+
+                if (err.response.status === 400) {
+                    message = "Что-то не так с записанным звуком"
+                }
+
+                if (err.response.status === 401) {
+                    message = "Неправильная почта или голос"
+                }
+
+                setError(message)
+            })
     }
 
     return (

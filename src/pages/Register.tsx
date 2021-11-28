@@ -10,12 +10,19 @@ const Register = () => {
     const onSubmit = async (formData: FormData) => {
         setError("")
         await axiosInstance.post("register", formData)
-            .then(function (_) {
-                navigate('/login')
+            .then(res => {
+                navigate(`/login`)
             })
-            .catch(function (error) {
-                setError(error)
-            });
+            .catch(err => {
+                let message = "Неизвестная ошибка, попробуйте еще раз..."
+
+                if (err.response.status === 400) {
+                    message = "Данные для регистрации некорректны"
+                }
+
+                setError(message)
+            })
+
     }
 
     return (
