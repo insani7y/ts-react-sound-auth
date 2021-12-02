@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 const axiosInstance = axios.create({
-    baseURL: `http://0.0.0.0:8000/go/`,
+    baseURL: `https://soundauth.ru/go/`,
     timeout: 3000,
     headers: {
         "Content-Type": "application/json",
